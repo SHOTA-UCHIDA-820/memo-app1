@@ -1,5 +1,11 @@
 package com.example.memoapp1.repository;
 
-public class TagRepository {
+import com.example.memoapp1.entity.Tag;
+import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
+
+public interface TagRepository extends JpaRepository<Tag, Long> {
+
+    List<Tag> findByIsDeletedFalse();
 }

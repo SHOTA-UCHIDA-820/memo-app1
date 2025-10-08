@@ -27,3 +27,4 @@ public class TagService {
                 .filter(tag -> !tag.isDeleted()) 
                 .orElse(null); 
     }
+}
