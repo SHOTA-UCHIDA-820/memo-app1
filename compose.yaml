@@ -1,22 +1,33 @@
+version: "3.9"
+
 services:
   mysql:
-    image: 'mysql:latest'
+    image: mysql:8.0
+    container_name: mysql
+    restart: always
     environment:
-      - 'MYSQL_DATABASE=memo_system'
-      - 'MYSQL_PASSWORD=password'
-      - 'MYSQL_ROOT_PASSWORD=password'
-      - 'MYSQL_USER=user'
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: memo_system
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
     ports:
       - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
 
   phpmyadmin:
-    image: phpmyadmin
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin
+    restart: always
     depends_on:
       - mysql
     environment:
-      - PMA_ARBITRARY=1
-      - PMA_HOST=mysql
-      - PMA_USER=root
-      - PMA_PASSWORD=password
+      PMA_HOST: mysql          # ✅ MySQLコンテナ名と一致させる
+      PMA_USER: root
+      PMA_PASSWORD: password
     ports:
       - "3001:80"
+
+volumes:
+  mysql_data:
+

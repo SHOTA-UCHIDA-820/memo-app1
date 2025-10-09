@@ -6,7 +6,7 @@ import java.util.Set;
 
 @Entity
 @Table(name = "tag")
-public class Tag {
+public class Tags {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -18,7 +18,7 @@ public class Tag {
     private boolean isDeleted;
 
     @ManyToMany(mappedBy = "tags")
-    private Set<Memo> memos = new HashSet<>();
+    private Set<Memos> memos = new HashSet<>();
 
     // getter/setter
     public Long getId() { return id; }
@@ -30,6 +30,6 @@ public class Tag {
     public boolean isDeleted() { return isDeleted; }
     public void setDeleted(boolean deleted) { isDeleted = deleted; }
 
-    public Set<Memo> getMemos() { return memos; }
-    public void setMemos(Set<Memo> memos) { this.memos = memos; }
+    public Set<Memos> getMemos() { return memos; }
+    public void setMemos(Set<Memos> memos) { this.memos = memos; }
 }

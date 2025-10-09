@@ -1,7 +1,7 @@
 package com.example.memoapp1.service;
 
-import com.example.memoapp1.entity.Memo;
-import com.example.memoapp1.entity.Tag;
+import com.example.memoapp1.entity.Memos;
+import com.example.memoapp1.entity.Tags;
 import com.example.memoapp1.repository.MemoRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,28 +19,28 @@ public class MemoService {
     }
 
     @Transactional(readOnly = true)
-    public Memo getMemoById(Long id) {
+    public Memos findById(Long id) {
         return memoRepository.findByIdWithTags(id);
     }
 
     @Transactional(readOnly = true)
-    public List<Memo> getAllMemos() {
+    public List<Memos> findAll() {
         return memoRepository.findAllWithTags();
     }
 
     @Transactional
-    public Memo createMemo(Memo memo) {
+    public Memos save(Memos memo) {
         return memoRepository.save(memo);
     }
 
     @Transactional
-    public Memo updateMemo(Memo memo, Set<Tag> tags) {
+    public Memos update(Memos memo, Set<Tags> tags) {
         memo.setTags(tags);
         return memoRepository.save(memo);
     }
 
     @Transactional
-    public void deleteMemo(Long id) {
+    public void delete(Long id) {
         memoRepository.deleteById(id);
     }
 }

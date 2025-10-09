@@ -9,7 +9,7 @@ import java.util.Set;
 
 @Entity
 @Table(name = "memo")
-public class Memo {
+public class Memos {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,7 +28,7 @@ public class Memo {
         joinColumns = @JoinColumn(name = "memo_id"),
         inverseJoinColumns = @JoinColumn(name = "tag_id")
     )
-    private Set<Tag> tags = new HashSet<>();
+    private Set<Tags> tags = new HashSet<>();
 
     // getter/setter
     public Long getId() { return id; }
@@ -43,8 +43,8 @@ public class Memo {
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 
-    public Set<Tag> getTags() { return tags; }
-    public void setTags(Set<Tag> tags) { this.tags = tags; }
+    public Set<Tags> getTags() { return tags; }
+    public void setTags(Set<Tags> tags) { this.tags = tags; }
 
     public String getFormattedCreatedAt() {
         if (createdAt == null) return "";
