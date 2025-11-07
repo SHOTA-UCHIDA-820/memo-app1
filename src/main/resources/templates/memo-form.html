@@ -2,34 +2,153 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title th:text="(${memo.id} == null) ? '新規メモ作成' : 'メモ編集'">メモ作成/編集</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title th:text="${memo.id} != null ? 'メモ編集' : '新規メモ作成'"></title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body>
-<div class="container mt-4">
-    <h2 th:text="(${memo.id} == null) ? '新規メモ作成' : 'メモ編集'">メモ作成/編集</h2>
-    <form th:action="(${memo.id} == null) ? @{/memos} : @{/memos/{id}/edit(id=${memo.id})}" method="post">
-        <div class="mb-3">
-            <label for="title" class="form-label">タイトル</label>
-            <input type="text" id="title" name="title" th:value="${memo.title}" class="form-control" required>
+<body class="bg-light">
+
+<div class="container mt-5" style="max-width: 720px;">
+
+    <!-- ページタイトル -->
+    <h2 class="mb-4 fw-bold text-center" th:text="${memo.id} != null ? 'メモ編集' : 'メモ登録'"></h2>
+
+    <!-- フォームカード -->
+    <div class="card shadow-sm rounded-3">
+        <div class="card-body p-4">
+            <form th:action="@{${memo.id} != null ? '/memos/' + ${memo.id} + '/edit' : '/memos'}"
+                  th:object="${memo}" method="post">
+
+                <!-- タイトル -->
+                <div class="mb-3">
+                    <label for="title" class="form-label">タイトル</label>
+                    <input type="text" class="form-control" id="title"
+                           th:field="*{title}" placeholder="タイトルを入力" required>
+                </div>
+
+                <!-- タグ選択 -->
+                <div class="mb-3">
+                    <label class="form-label">タグ選択</label>
+                    
+                    <!-- 選択されたタグ表示エリア -->
+                    <div class="mb-3 p-2 border rounded" style="min-height: 40px; background-color: white">
+                        <div id="selectedTags" class="d-flex flex-wrap gap-2">
+                            <!-- 選択されたタグがここに表示される -->
+                        </div>
+                        <div id="noTagsMessage" class="text-muted text-center py-2" style="display: none;">
+                            選択されたタグはありません
+                        </div>
+                    </div>
+                    
+                    <!-- タグ選択チェックボックス -->
+                    <div class="row">
+                        <div th:each="tag : ${tags}" class="col-md-6 col-lg-4">
+                            <div class="form-check">
+                                <input class="form-check-input tag-checkbox" 
+                                       type="checkbox" 
+                                       th:id="'tag-' + ${tag.id}"
+                                       name="tagIds" 
+                                       th:value="${tag.id}"
+                                       th:data-tag-name="${tag.name}"
+                                       th:checked="${memo.tags != null and memo.tags.contains(tag)}">
+                                <label class="form-check-label" th:for="'tag-' + ${tag.id}" th:text="${tag.name}">
+                                    タグ名
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <small class="text-muted">※複数選択できます</small>
+                </div>
+				
+				<!-- 内容 -->
+				<div class="mb-3">
+				    <label for="content" class="form-label">メモ</label>
+				    <textarea class="form-control" id="content" th:field="*{content}"
+				              rows="5" placeholder="メモの内容を入力" required></textarea>
+				</div>
+
+                <!-- ボタン -->
+                <div class="d-flex justify-content-center gap-5">
+                    <a href="/memos" class="btn btn-outline-secondary rounded-pill py-2" style="width: 120px;">キャンセル</a>
+                    <button type="submit" class="btn btn-primary rounded-pill py-2" style="width: 120px;"
+                            th:text="${memo.id} != null ? '更新' : '作成'"></button>
+                </div>
+            </form>
         </div>
-        <div class="mb-3">
-            <label for="content" class="form-label">内容</label>
-            <textarea id="content" name="content" rows="5" class="form-control" required
-                      th:text="${memo.content}"></textarea>
-        </div>
-        <div class="mb-3">
-            <label class="form-label">タグ</label><br>
-            <div th:each="tag : ${tags}" class="form-check form-check-inline">
-                <input type="checkbox" name="tagIds" th:value="${tag.id}"
-                       th:checked="${memo.tags.contains(tag)}" class="form-check-input">
-                <label th:text="${tag.name}" class="form-check-label"></label>
-            </div>
-        </div>
-        <button type="submit" class="btn btn-primary">保存</button>
-        <a th:href="@{/memos}" class="btn btn-secondary">戻る</a>
-    </form>
+    </div>
+
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- タグ選択機能のJavaScript -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const selectedTags = document.getElementById('selectedTags');
+    const noTagsMessage = document.getElementById('noTagsMessage');
+    const tagCheckboxes = document.querySelectorAll('.tag-checkbox');
+    
+    // 初期状態で選択されているタグを表示
+    updateSelectedTagsDisplay();
+    
+    // チェックボックスの変更を監視
+    tagCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            updateSelectedTagsDisplay();
+        });
+    });
+    
+    function updateSelectedTagsDisplay() {
+        const selectedCheckboxes = document.querySelectorAll('.tag-checkbox:checked');
+        selectedTags.innerHTML = '';
+        
+        if (selectedCheckboxes.length === 0) {
+            noTagsMessage.style.display = 'block';
+        } else {
+            noTagsMessage.style.display = 'none';
+            
+            selectedCheckboxes.forEach(checkbox => {
+                const tagName = checkbox.getAttribute('data-tag-name');
+                const tagId = checkbox.value;
+                
+                const tagElement = document.createElement('div');
+                tagElement.className = 'd-inline-flex align-items-center bg-primary text-white px-2 py-1 rounded-pill';
+                tagElement.style.fontSize = '0.875rem';
+                tagElement.innerHTML = `
+				    <button type="button" class="btn-close btn-close-white" style="font-size: 0.7rem;" 
+				                            data-tag-id="${tagId}" title="タグを削除"></button>
+                    <span class="me-1">${tagName}</span>
+                `;
+                
+                selectedTags.appendChild(tagElement);
+            });
+        }
+    }
+    
+    // タグ削除ボタンのクリックイベント
+    selectedTags.addEventListener('click', function(e) {
+        if (e.target.classList.contains('btn-close')) {
+            const tagId = e.target.getAttribute('data-tag-id');
+            const checkbox = document.querySelector(`input[value="${tagId}"]`);
+            if (checkbox) {
+                checkbox.checked = false;
+                updateSelectedTagsDisplay();
+            }
+        }
+    });
+    
+    // フォーム送信時のデバッグ
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const checkboxes = document.querySelectorAll('input[name="tagIds"]:checked');
+        const selectedIds = Array.from(checkboxes).map(cb => cb.value);
+        console.log('選択されたタグIDs:', selectedIds);
+        
+        if (selectedIds.length === 0) {
+            console.log('警告: タグが一つも選択されていません');
+        }
+    });
+});
+</script>
+
 </body>
 </html>
 
