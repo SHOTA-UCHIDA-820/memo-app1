@@ -251,8 +251,6 @@
 
         memos.forEach(memoCol => {
             const memoCard = memoCol.querySelector('.memo-card');
-
-            // data属性から全データを取得
             const title = memoCard.getAttribute('data-title')?.toLowerCase() || '';
             const fullContent = memoCol.querySelector('.memo-content-full').textContent.toLowerCase();
             const tags = memoCard.getAttribute('data-tags')?.toLowerCase() || '';
@@ -392,7 +390,7 @@
         }
     }
 
-    // チェックボックスの変更を監視（状態をfilterStateにも反映）
+    // チェックボックスの変更を監視
     tagDropdownMenu.addEventListener('change', (e) => {
         if (e.target.type === 'checkbox') {
             const tag = e.target.getAttribute('value');
@@ -409,9 +407,6 @@
     applyFilterBtn.addEventListener('click', () => {
         filterState.startDate = filterStartDate.value || null;
         filterState.endDate = filterEndDate.value || null;
-
-        // 状態はchangeで都度同期済みのため、ここでは再集計不要
-
         applyAllFilters();
         // ドロップダウンを閉じる
         const filterDd = bootstrap.Dropdown.getOrCreateInstance(filterDropdownBtn);
@@ -428,7 +423,7 @@
         updateTagDropdownText();
         updateFilterSelectedTagsDisplay();
         applyAllFilters();
-        // ドロップダウンを閉じる（キャンセルは閉じるのみで良い要望のためこちらに残す）
+        // ドロップダウンを閉じる
         const filterDd = bootstrap.Dropdown.getOrCreateInstance(filterDropdownBtn);
         filterDd.hide();
     });
@@ -437,11 +432,10 @@
     function updateFilterSelectedTagsDisplay() {
         const container = document.getElementById('filterSelectedTags');
         const emptyMsg = document.getElementById('filterNoTagsMessage');
-        // まず既存のピルだけを消す（emptyMsgはDOM移動しない）
+        // まず既存のピルだけを消す
         while (container.firstChild) {
             container.removeChild(container.firstChild);
         }
-        // filterStateからソースオブトゥルースで取得
         const selected = Array.from(filterState.selectedTags);
         if (selected.length === 0) {
             emptyMsg.style.display = 'block';
@@ -475,10 +469,9 @@
         }
     });
 
-    // フィルタードロップダウン内のクリックで閉じないようにする（ラベル操作・チェック時は閉じない）
+    // フィルタードロップダウン内のクリックで閉じないようにする
     const filterDropdownMenuContainer = document.getElementById('filterDropdownMenuContainer');
     if (filterDropdownMenuContainer) {
-        // 入力系は通常動作を許可し、ドロップダウンの自動クローズだけを抑制
         filterDropdownMenuContainer.addEventListener('click', (e) => {
             e.stopPropagation();
         });
