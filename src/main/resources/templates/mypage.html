@@ -50,6 +50,8 @@
 		    padding: 0px 4px;            
 		    text-align: center;
 		    border-radius: 3px;
+			flex-shrink: 0;
+			white-space: nowrap;
 		}
 		
 		.tag-badge {
@@ -59,6 +61,7 @@
 		    padding: 2px 6px;
 		    border-radius: 9999px;
 		    margin-right: 4px;
+			white-space: nowrap;
 		}
 		
         .search-highlight {
@@ -170,15 +173,17 @@
                         </div>
                     </div>
 
-                    <!-- タグ -->
-					<div class="mb-2 d-flex align-items-center flex-wrap gap-2">
+					<!-- タグ -->
+					<div class="mb-2 d-flex align-items-start gap-2">
 					    <span class="label">タグ</span>
-					    <span th:each="tag : ${memo.tags}"
-					          th:text="${tag.name}"
-					          class="tag-badge"></span>
+					    <div class="d-flex flex-wrap gap-2">
+					        <span th:each="tag : ${memo.tags}"
+					              th:text="${tag.name}"
+					              class="tag-badge"></span>
+					    </div>
 					</div>
-					
-                    <!-- 日付 -->
+
+					<!-- 日付 -->
 					<div class="mb-2 d-flex align-items-center gap-2" style="margin-top: -2px;">
 					    <span class="label">登録日</span>
 					    <span class="memo-date"
