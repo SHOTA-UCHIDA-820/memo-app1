@@ -15,8 +15,10 @@
     <!-- フォームカード -->
     <div class="card shadow-sm rounded-3">
         <div class="card-body p-4">
-            <form th:action="@{${memo.id} != null ? '/memos/' + ${memo.id} + '/edit' : '/memos'}"
+			<form th:action="@{${memo.id} != null ? '/memo/edit?id=' + ${memo.id} : '/memo/add'}"
                   th:object="${memo}" method="post">
+                <!-- 編集時はidパラメータを追加 -->
+                <input type="hidden" name="id" th:if="${memo.id != null}" th:value="${memo.id}" />
 
                 <!-- タイトル -->
                 <div class="mb-3">
@@ -40,8 +42,11 @@
                     </div>
                     
                     <!-- タグ選択チェックボックス -->
-                    <div class="row">
-                        <div th:each="tag : ${tags}" class="col-md-6 col-lg-4">
+                    <div th:if="${tags == null or tags.isEmpty()}" class="alert alert-info mb-3">
+                        タグが登録されていません。先にタグを登録してください。
+                    </div>
+                    <div th:unless="${tags == null or tags.isEmpty()}" class="row">
+                        <div th:each="tag : ${tags}" class="col-md-6 col-lg-4 mb-2">
                             <div class="form-check">
                                 <input class="form-check-input tag-checkbox" 
                                        type="checkbox" 
@@ -50,13 +55,13 @@
                                        th:value="${tag.id}"
                                        th:data-tag-name="${tag.name}"
                                        th:checked="${memo.tags != null and memo.tags.contains(tag)}">
-                                <label class="form-check-label" th:for="'tag-' + ${tag.id}" th:text="${tag.name}">
+                                <label class="form-check-label" th:for="'tag-' + ${tag.id}" th:text="${tag.name}" style="cursor: pointer;">
                                     タグ名
                                 </label>
                             </div>
                         </div>
                     </div>
-                    <small class="text-muted">※複数選択できます</small>
+                    <small class="text-muted" th:if="${tags != null and !tags.isEmpty()}">※複数選択できます</small>
                 </div>
 				
 				<!-- 内容 -->
@@ -68,7 +73,7 @@
 
                 <!-- ボタン -->
                 <div class="d-flex justify-content-center gap-5">
-                    <a href="/memos" class="btn btn-outline-secondary rounded-pill py-2" style="width: 120px;">キャンセル</a>
+                    <a href="/memo/list" class="btn btn-outline-secondary rounded-pill py-2" style="width: 120px;">キャンセル</a>
                     <button type="submit" class="btn btn-primary rounded-pill py-2" style="width: 120px;"
                             th:text="${memo.id} != null ? '更新' : '作成'"></button>
                 </div>
@@ -151,6 +156,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
 </body>
 </html>
+
+
+
+
+
+
+
+
+
 
 
 

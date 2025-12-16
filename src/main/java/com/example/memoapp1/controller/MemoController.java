@@ -7,13 +7,15 @@ import com.example.memoapp1.service.TagService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import java.time.LocalDate;
+
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 @Controller
-@RequestMapping("/memos")
+@RequestMapping("/memo")
 public class MemoController {
 
     private final MemoService memoService;
@@ -24,90 +26,105 @@ public class MemoController {
         this.tagService = tagService;
     }
 
-	//メモ一覧取得
-    @GetMapping("")
-    public String getMypage(Model model) {
-        model.addAttribute("memos", memoService.findAll());
-        return "mypage";
-    }  
-    //新規メモ作成画面
-    @GetMapping("/add")
-    public String getCreatePage(Model model) {
-    	model.addAttribute("memo" , new Memos());
-    	model.addAttribute("tags" , tagService.getAllActiveTags());
-    	return "memo-form";
+    // D-2-1-1: メモ一覧表示
+    @GetMapping("/list")
+    public String listMemos(
+            @RequestParam(value = "title", required = false) String title,
+            @RequestParam(value = "startDate", required = false) String startDateStr,
+            @RequestParam(value = "endDate", required = false) String endDateStr,
+            @RequestParam(value = "tags", required = false) Set<String> selectedTags,
+            @RequestParam(value = "sort", required = false) String sortOrder,
+            Model model) {
+
+        LocalDate startDate = (startDateStr == null || startDateStr.isBlank()) ? null : LocalDate.parse(startDateStr);
+        LocalDate endDate = (endDateStr == null || endDateStr.isBlank()) ? null : LocalDate.parse(endDateStr);
+
+        List<Memos> memos = memoService.searchMemos(title, startDate, endDate, selectedTags, sortOrder);
+        model.addAttribute("memos", memos);
+        model.addAttribute("tags", tagService.getAllActiveTags());
+        
+        // 現在の検索条件を保持
+        model.addAttribute("currentTitle", title != null ? title : "");
+        model.addAttribute("currentStartDate", startDateStr != null ? startDateStr : "");
+        model.addAttribute("currentEndDate", endDateStr != null ? endDateStr : "");
+        model.addAttribute("currentSelectedTags", selectedTags != null ? selectedTags : new HashSet<>());
+        model.addAttribute("currentSort", sortOrder != null ? sortOrder : "");
+
+        return "memo/list";
     }
-    
-    //新規メモ作成処理
-    @PostMapping("")
-    public String postCreatePage(@ModelAttribute Memos memo,
-                                 @RequestParam(value = "tagIds", required = false) List<Long> tagIds) {
+
+
+    // D-2-2-1: メモ登録画面表示
+    @GetMapping("/add")
+    public String showAddPage(Model model) {
+        model.addAttribute("memo", new Memos());
+        model.addAttribute("tags", tagService.getAllActiveTags());
+        return "memo/edit";
+    }
+
+    // P-2-2-2: メモ登録処理
+    @PostMapping("/add")
+    public String addMemo(@ModelAttribute Memos memo,
+                          @RequestParam(value = "tagIds", required = false) List<Long> tagIds) {
 
         Set<Tags> selectedTags = new HashSet<>();
-        if (tagIds != null && !tagIds.isEmpty()) {
-            for (Long tagId : tagIds) {
-                Tags tag = tagService.getTagById(tagId);
-                if (tag != null) {
-                    selectedTags.add(tag);
-                }
+        if (tagIds != null) {
+            for (Long id : tagIds) {
+                Tags tag = tagService.getTagById(id);
+                if (tag != null) selectedTags.add(tag);
             }
         }
         memo.setTags(selectedTags);
         memoService.save(memo);
-        return "redirect:/memos";
+        return "redirect:/memo/list";
     }
-    
-    //メモ詳細画面表示
-    @GetMapping("/{id}")
-    public String getMemoByld(@PathVariable Long id, Model model) {
-    	Memos memo = memoService.findById(id);
-    	model.addAttribute("memo", memo);
-    	return "memo-detail";
+
+    // D-2-3-1: メモ編集画面表示
+    @GetMapping("/edit")
+    public String showEditPage(@RequestParam("id") Long id, Model model) {
+        Memos memo = memoService.findById(id);
+        model.addAttribute("memo", memo);
+        model.addAttribute("tags", tagService.getAllActiveTags());
+        return "memo/edit";
     }
-    
-    //メモ編集画面表示
-    @GetMapping("/{id}/edit")
-    public String  getUpdatePage(@PathVariable Long id, Model model) {
-    	Memos memo = memoService.findById(id);
-    	model.addAttribute("memo", memo);
-    	model.addAttribute("tags" , tagService.getAllActiveTags());
-    	return "memo-form";
-    }
-    
-    //メモ編集処理
-    @PostMapping("/{id}/edit")
-    public String postupdatePage(@PathVariable Long id,
-                             @ModelAttribute Memos memo,
-                             @RequestParam(value = "tagIds", required = false) List<Long> tagIds) {
+
+    // P-2-3-2: メモ編集処理
+    @PostMapping("/edit")
+    public String editMemo(@RequestParam("id") Long id,
+                           @ModelAttribute Memos memo,
+                           @RequestParam(value = "tagIds", required = false) List<Long> tagIds) {
 
         Memos existingMemo = memoService.findById(id);
-
         existingMemo.setTitle(memo.getTitle());
         existingMemo.setContent(memo.getContent());
 
         Set<Tags> selectedTags = new HashSet<>();
-        if (tagIds != null && !tagIds.isEmpty()) {
-            for (Long tagId : tagIds) {
-                Tags tag = tagService.getTagById(tagId);
-                if (tag != null) {
-                    selectedTags.add(tag);
-                }
+        if (tagIds != null) {
+            for (Long tid : tagIds) {
+                Tags tag = tagService.getTagById(tid);
+                if (tag != null) selectedTags.add(tag);
             }
         }
-
-        // タグの更新
-        existingMemo.getTags().clear(); // 既存のタグをクリア
         existingMemo.setTags(selectedTags);
-
         memoService.update(existingMemo, selectedTags);
 
-        return "redirect:/memos";
+        return "redirect:/memo/list";
     }
-    
-    //メモ削除処理
-    @PostMapping("/{id}/delete")
-    public String deleteMemo(@PathVariable Long id) {
+
+    // D-2-4-1: メモ詳細表示
+    @GetMapping("/view")
+    public String viewMemo(@RequestParam("id") Long id, Model model) {
+        Memos memo = memoService.findById(id);
+        model.addAttribute("memo", memo);
+        return "memo/view";
+    }
+
+    // P-2-1-3: メモ削除処理
+    @PostMapping("/delete")
+    public String deleteMemo(@RequestParam("id") Long id) {
         memoService.delete(id);
-        return "redirect:/memos";
+        return "redirect:/memo/list";
     }
 }
+
+

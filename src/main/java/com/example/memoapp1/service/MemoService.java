@@ -3,9 +3,13 @@ package com.example.memoapp1.service;
 import com.example.memoapp1.entity.Memos;
 import com.example.memoapp1.entity.Tags;
 import com.example.memoapp1.repository.MemoRepository;
+import com.example.memoapp1.specification.MemoSpecification;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 
@@ -28,6 +32,23 @@ public class MemoService {
         return memoRepository.findAllWithTags();
     }
 
+    @Transactional(readOnly = true)
+    public List<Memos> searchMemos(String keyword, LocalDate startDate, LocalDate endDate, Set<String> tagNames, String sortOrder) {
+
+        Specification<Memos> spec = Specification.allOf(
+                MemoSpecification.containsKeyword(keyword),
+                MemoSpecification.createdAfter(startDate),
+                MemoSpecification.createdBefore(endDate),
+                MemoSpecification.hasTags(tagNames)
+        );
+
+        Sort sort = "desc".equalsIgnoreCase(sortOrder)
+                ? Sort.by("createdAt").descending()
+                : Sort.by("createdAt").ascending();
+
+        return memoRepository.findAll(spec, sort);
+    }
+
     @Transactional
     public Memos save(Memos memo) {
         return memoRepository.save(memo);
@@ -44,4 +65,8 @@ public class MemoService {
         memoRepository.deleteById(id);
     }
 }
+
+
+
+
 
