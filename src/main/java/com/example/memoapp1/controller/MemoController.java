@@ -7,11 +7,11 @@ import com.example.memoapp1.service.TagService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+
 import java.time.LocalDate;
-
-
 import java.util.HashSet;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Set;
 
 @Controller
@@ -26,7 +26,7 @@ public class MemoController {
         this.tagService = tagService;
     }
 
-    // D-2-1-1: メモ一覧表示
+    // メモ一覧表示
     @GetMapping("/list")
     public String listMemos(
             @RequestParam(value = "title", required = false) String title,
@@ -41,9 +41,8 @@ public class MemoController {
 
         List<Memos> memos = memoService.searchMemos(title, startDate, endDate, selectedTags, sortOrder);
         model.addAttribute("memos", memos);
-        model.addAttribute("tags", tagService.getAllActiveTags());
-        
-        // 現在の検索条件を保持
+        model.addAttribute("tags", tagService.getAllTags());
+
         model.addAttribute("currentTitle", title != null ? title : "");
         model.addAttribute("currentStartDate", startDateStr != null ? startDateStr : "");
         model.addAttribute("currentEndDate", endDateStr != null ? endDateStr : "");
@@ -53,16 +52,15 @@ public class MemoController {
         return "memo/list";
     }
 
-
-    // D-2-2-1: メモ登録画面表示
+    // メモ登録画面
     @GetMapping("/add")
     public String showAddPage(Model model) {
         model.addAttribute("memo", new Memos());
-        model.addAttribute("tags", tagService.getAllActiveTags());
+        model.addAttribute("tags", tagService.getAllTags());
         return "memo/edit";
     }
 
-    // P-2-2-2: メモ登録処理
+    // メモ登録処理
     @PostMapping("/add")
     public String addMemo(@ModelAttribute Memos memo,
                           @RequestParam(value = "tagIds", required = false) List<Long> tagIds) {
@@ -79,16 +77,16 @@ public class MemoController {
         return "redirect:/memo/list";
     }
 
-    // D-2-3-1: メモ編集画面表示
+    // メモ編集画面
     @GetMapping("/edit")
     public String showEditPage(@RequestParam("id") Long id, Model model) {
         Memos memo = memoService.findById(id);
         model.addAttribute("memo", memo);
-        model.addAttribute("tags", tagService.getAllActiveTags());
+        model.addAttribute("tags", tagService.getAllTags());
         return "memo/edit";
     }
 
-    // P-2-3-2: メモ編集処理
+    // メモ編集処理
     @PostMapping("/edit")
     public String editMemo(@RequestParam("id") Long id,
                            @ModelAttribute Memos memo,
@@ -111,7 +109,7 @@ public class MemoController {
         return "redirect:/memo/list";
     }
 
-    // D-2-4-1: メモ詳細表示
+    // メモ詳細表示
     @GetMapping("/view")
     public String viewMemo(@RequestParam("id") Long id, Model model) {
         Memos memo = memoService.findById(id);
@@ -119,7 +117,7 @@ public class MemoController {
         return "memo/view";
     }
 
-    // P-2-1-3: メモ削除処理
+    // メモ削除
     @PostMapping("/delete")
     public String deleteMemo(@RequestParam("id") Long id) {
         memoService.delete(id);

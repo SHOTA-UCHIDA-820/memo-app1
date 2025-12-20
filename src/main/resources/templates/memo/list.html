@@ -105,22 +105,22 @@
                             <label class="form-label">タグ</label>
                             <!-- 選択タグ表示エリア -->
                             <div id="filterSelectedTagsContainer" class="mb-2 p-2 border rounded" style="min-height: 36px; background-color: white;">
-                                <div id="filterSelectedTags" class="d-flex flex-wrap gap-2">
+                                <div id="filterSelectedTags" class="d-flex flex-wrap gap-2" th:if="${currentSelectedTags != null}">
                                     <span th:each="selectedTag : ${currentSelectedTags}" 
                                           th:text="${selectedTag}" 
                                           class="tag-badge"></span>
                                 </div>
                                 <div id="filterNoTagsMessage" 
                                      class="text-muted text-center py-1" 
-                                     th:if="${currentSelectedTags == null or currentSelectedTags.isEmpty()}">
+                                     th:if="${currentSelectedTags == null or currentSelectedTags.size() == 0}">
                                     選択されたタグはありません
                                 </div>
                             </div>
                             <!-- タグチェックリスト -->
-                            <div style="max-height: 200px; overflow-y: auto;" onclick="event.stopPropagation();">
-                                <div th:if="${tags == null or tags.isEmpty()}" class="text-muted small">
-                                    タグが登録されていません
-                                </div>
+                            <div th:if="${tags == null or tags.size() == 0}" class="text-muted small">
+                                タグが登録されていません
+                            </div>
+                            <div th:unless="${tags == null or tags.size() == 0}" style="max-height: 200px; overflow-y: auto;" onclick="event.stopPropagation();">
                                 <div th:each="tag : ${tags}" class="form-check ms-2">
                                     <input class="form-check-input tag-filter-checkbox" 
                                            type="checkbox" 
@@ -179,7 +179,10 @@
     <div class="row g-4" id="memoContainer">
         <div class="col-md-6 col-lg-3" th:each="memo : ${memos}">
             <div class="card memo-card h-100" 
-                 th:attr="data-title=${memo.title}, data-content=${memo.content}, data-tags=${#strings.listJoin(memo.tags.![name], ' ')}, data-created-at=${memo.createdAt}">
+                 th:data-title="${memo.title}" 
+                 th:data-content="${memo.content}" 
+                 th:data-tags="${memo.tags != null and !memo.tags.isEmpty() ? #strings.listJoin(memo.tags.![name], ' ') : ''}" 
+                 th:data-created-at="${memo.createdAt}">
                 <div class="card-body d-flex flex-column">
                     <!-- タイトルとメニュー -->
                     <div class="d-flex justify-content-between">
@@ -220,7 +223,7 @@
                     <div class="mb-2 d-flex align-items-center gap-2" style="margin-top: -2px;">
                         <span class="label">登録日</span>
                         <span class="memo-date"
-                              th:text="${memo.formattedCreatedAt}">2025/01/01 12:00</span>
+                              th:text="${memo.createdAt != null ? #temporals.format(memo.createdAt, 'yyyy/MM/dd HH:mm') : ''}">2025/01/01 12:00</span>
                     </div>
 
                     <!-- 本文（表示用と検索用を分離） -->

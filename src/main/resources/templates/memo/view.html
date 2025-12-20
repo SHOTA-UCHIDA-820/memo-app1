@@ -49,7 +49,7 @@
 	<div class="d-flex mb-2">
 		<div class="d-flex me-5">
 			<h5><span class="label">登録日</span></h5>
-			<h5 th:text="${memo.formattedCreatedAt}" style="margin-top: 3px;">2025/08/31 12:00</h5>
+			<h5 th:text="${memo.createdAt != null ? #temporals.format(memo.createdAt, 'yyyy/MM/dd HH:mm') : ''}" style="margin-top: 3px;">2025/08/31 12:00</h5>
 		</div>
 		<div class="d-flex">
 			<h5><span class="label">タグ</span></h5>
