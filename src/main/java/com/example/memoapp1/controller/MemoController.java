@@ -7,11 +7,11 @@ import com.example.memoapp1.service.TagService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-
+import jakarta.validation.Valid;
+import org.springframework.validation.BindingResult;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
-import java.util.ArrayList;
 import java.util.Set;
 
 @Controller
@@ -55,15 +55,25 @@ public class MemoController {
     // メモ登録画面
     @GetMapping("/add")
     public String showAddPage(Model model) {
-        model.addAttribute("memo", new Memos());
+    	if (!model.containsAttribute("memo")) {
+            model.addAttribute("memo", new Memos());
+        }
         model.addAttribute("tags", tagService.getAllTags());
         return "memo/edit";
     }
 
     // メモ登録処理
     @PostMapping("/add")
-    public String addMemo(@ModelAttribute Memos memo,
-                          @RequestParam(value = "tagIds", required = false) List<Long> tagIds) {
+    public String addMemo(@Valid @ModelAttribute("memo") Memos memo, BindingResult result,
+                          @RequestParam(value = "tagIds", required = false) List<Long> tagIds, Model model) {
+    	
+    	 if (result.hasErrors()) {
+    	        // エラーがあれば保存せず画面に戻す
+    	        model.addAttribute("tags", tagService.getAllTags());
+    	        model.addAttribute("memo", memo);
+    	        return "memo/edit";
+    	    }
+    	 
 
         Set<Tags> selectedTags = new HashSet<>();
         if (tagIds != null) {
@@ -81,6 +91,10 @@ public class MemoController {
     @GetMapping("/edit")
     public String showEditPage(@RequestParam("id") Long id, Model model) {
         Memos memo = memoService.findById(id);
+        if (memo == null) {
+            // 存在しないIDなら新規に作る or エラー画面へ
+            memo = new Memos();
+        }
         model.addAttribute("memo", memo);
         model.addAttribute("tags", tagService.getAllTags());
         return "memo/edit";
@@ -89,8 +103,14 @@ public class MemoController {
     // メモ編集処理
     @PostMapping("/edit")
     public String editMemo(@RequestParam("id") Long id,
-                           @ModelAttribute Memos memo,
-                           @RequestParam(value = "tagIds", required = false) List<Long> tagIds) {
+    		               @Valid @ModelAttribute("memo") Memos memo, BindingResult result,
+                           @RequestParam(value = "tagIds", required = false) List<Long> tagIds, Model model) {
+    	
+    	if (result.hasErrors()) {
+            model.addAttribute("tags", tagService.getAllTags());
+            model.addAttribute("memo", memo);
+            return "memo/edit";
+        }
 
         Memos existingMemo = memoService.findById(id);
         existingMemo.setTitle(memo.getTitle());

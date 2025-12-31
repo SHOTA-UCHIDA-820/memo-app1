@@ -14,21 +14,34 @@
             max-width: 1200px;
         }
 
-        .memo-card {
-            border-radius: 16px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
+		.memo-card {
+		  border-radius: 16px;
+		  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+		  transition: transform 0.2s ease, box-shadow 0.2s ease;
+		  display: flex;
+		}
 
         .memo-card:hover {
             transform: translateY(-4px);
             box-shadow: 0 8px 20px rgba(0,0,0,0.12);
         }
+		
+		.card-body {
+		  min-width: 0;
+		}
 
-        .memo-title {
-            font-size: 1.25rem;
-            font-weight: 600;
-        }
+		.memo-title {
+		  display: block;
+		  font-size: 1.25rem;
+		  font-weight: 600;
+		  white-space: nowrap;
+		  overflow: hidden;
+		  text-overflow: ellipsis;
+		}
+		
+		.memo-title-link {
+		  min-width: 0;
+		}
 
         .memo-date {
             font-size: 0.85rem;
@@ -186,7 +199,7 @@
                 <div class="card-body d-flex flex-column">
                     <!-- タイトルとメニュー -->
                     <div class="d-flex justify-content-between">
-                        <a th:href="@{'/memo/view?id=' + ${memo.id}}" class="text-decoration-none flex-grow-1">
+                        <a th:href="@{'/memo/view?id=' + ${memo.id}}" class="text-decoration-none flex-grow-1 memo-title-link">
                             <h5 class="memo-title mb-2 text-primary" th:text="${memo.title}">メモタイトル</h5>
                         </a>
                         <div class="dropdown">

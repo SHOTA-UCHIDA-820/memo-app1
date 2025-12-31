@@ -5,6 +5,8 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Set;
 import java.util.HashSet;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
 
 @Entity
@@ -12,6 +14,8 @@ import java.util.HashSet;
 public class Memos extends BaseEntity {
 
     @Column(nullable = false, length = 100)
+    @NotBlank(message = "タイトルは必須です")
+    @Size(max = 100, message = "タイトルは100文字以内で入力してください")
     private String title;
 
     @Column(nullable = false, columnDefinition = "TEXT")
