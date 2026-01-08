@@ -23,6 +23,11 @@
 		    height: 2px;
 		    background: black;
 		}
+		
+		.memo-text {
+		  word-break: break-word;
+		  overflow-wrap: break-word;
+		}
 
 		.tag-badge {
 			background-color: #e0e7ff;
@@ -60,7 +65,7 @@
 			<h5><span th:each="tag : ${memo.tags}" th:text="${tag.name}" class="tag-badge"></span></h5>
 		</div>
 	</div>
-    <p class="my-4" th:text="${memo.content}"></p>
+    <p class="memo-text my-4" th:text="${memo.content}"></p>
 	<a th:href="@{/memo/list}" class="btn btn-primary">戻る</a>
 </body>
 </html>
