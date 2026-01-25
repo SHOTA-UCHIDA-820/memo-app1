@@ -44,6 +44,7 @@ class MemoServiceTest {
 
         assertEquals(memo, result);
         assertEquals("テストタイトル", result.getTitle());
+        assertEquals("テスト内容", result.getContent());
         verify(memoRepository).findByIdWithTags(1L);
     }
 
@@ -103,11 +104,16 @@ class MemoServiceTest {
     @DisplayName("メモを保存できる")
     void save_正常系() {
         Memos memo = new Memos();
+        memo.setTitle("保存テスト");
+        memo.setContent("内容");
+
         when(memoRepository.save(memo)).thenReturn(memo);
 
         Memos result = memoService.save(memo);
 
         assertEquals(memo, result);
+        assertEquals("保存テスト", result.getTitle());
+        assertEquals("内容", result.getContent());
         verify(memoRepository).save(memo);
     }
 
