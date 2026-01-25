@@ -36,11 +36,14 @@ class MemoServiceTest {
     @DisplayName("IDを指定してメモを取得できる")
     void findById_正常系() {
         Memos memo = new Memos();
+        memo.setTitle("テストタイトル");
+        memo.setContent("テスト内容");
         when(memoRepository.findByIdWithTags(1L)).thenReturn(memo);
 
         Memos result = memoService.findById(1L);
 
         assertEquals(memo, result);
+        assertEquals("テストタイトル", result.getTitle());
         verify(memoRepository).findByIdWithTags(1L);
     }
 
@@ -184,16 +187,17 @@ class MemoServiceTest {
     }
 
     @Test
-    @DisplayName("検索結果がnullの場合、nullが返る")
-    void searchMemos_Repositoryがnullを返した場合() {
+    @DisplayName("検索結果が空の場合、空のリストが返る")
+    void searchMemos_Repositoryが空リストを返した場合() {
         when(memoRepository.findAll(
                 ArgumentMatchers.<Specification<Memos>>any(),
                 any(Sort.class)
-        )).thenReturn(null);
+        )).thenReturn(Collections.emptyList());
 
         List<Memos> result = memoService.searchMemos(null, null, null, null, null);
 
-        assertNull(result);
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
     }
 }
 
