@@ -121,7 +121,8 @@
                                 <div id="filterSelectedTags" class="d-flex flex-wrap gap-2" th:if="${currentSelectedTags != null}">
                                     <span th:each="selectedTag : ${currentSelectedTags}" 
                                           th:text="${selectedTag}" 
-                                          class="tag-badge"></span>
+                                          class="tag-badge"
+										  th:attr="data-tag=${selectedTag}"></span>
                                 </div>
                                 <div id="filterNoTagsMessage" 
                                      class="text-muted text-center py-1" 
